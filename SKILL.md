@@ -42,10 +42,12 @@ Everything hinges on the prompts. **Before writing any image or video prompt, re
 `references/prompt-guide.md`** — it has the exact prompt structures that make the difference
 between "a real Vox collage" and "a moving PowerPoint".
 
-## Prerequisites & Mandatory Voice Selection (check, don't skip)
+## Prerequisites & Mandatory Voice / Audio Selection (check, don't skip)
 
-- **TTS API Key (Required):** Check if `.env` or the environment has either `DARKPLANNER_API_KEY` (DarkPlanner TTS) or `GEMINI_API_KEY` (Google Gemini TTS). If both are empty, ask the user to configure one of them in `.env` (see `.env.example`).
-- **Mandatory Voice Question (ALWAYS ask during script creation):** Whenever the user asks to create a script or video (`beats.json`), **you MUST ask the user which TTS provider (`DarkPlanner` or `Google TTS`) and which voice (`voice_id` / voice name, e.g. `"A Top Narrator VO PRO"`, `"Norbert"`, or Google's `"Charon"`, `"Orus"`, `"Fenrir"`, `"Kore"`) will be used** before generating the narration! Run `python scripts/audio.py --list-voices` if the user wants to browse available voices.
+- **Designed for Google Antigravity:** Keyframe collage posters are generated directly via Antigravity's built-in Nano Banana (`image-generator` subagent) after running `python scripts/keyframes.py out/<project>`.
+- **Two Narration Options (Ask the user when creating the script):**
+  1. **User sends Ready Script + Ready Audio (No API Key required):** If the user provides their own `.mp3`/`.wav` voiceover along with the script, run `python scripts/audio.py out/<project> --from-audio <path_to_audio.mp3>` (or place `master.mp3` in `out/<project>/audio/`). It automatically slices the audio per beat, levels it, generates `_palavra.srt`, and aligns shot durations.
+  2. **Generate Narration via API (`DARKPLANNER_API_KEY` or `GEMINI_API_KEY`):** If the user wants the agent to generate the voiceover, check that `.env` has either `DARKPLANNER_API_KEY` (DarkPlanner TTS) or `GEMINI_API_KEY` (Google Gemini TTS). **MANDATORY RULE: Always ask the user which provider (`DarkPlanner` or `Google TTS`) and which voice (`voice_id` / voice name, e.g. `"A Top Narrator VO PRO"`, `"Norbert"`, or Google's `"Charon"`, `"Orus"`, `"Fenrir"`, `"Kore"`) will be used before running `scripts/audio.py`!** Run `python scripts/audio.py --list-voices` if the user wants to browse voices.
 - `ffmpeg` and `ffprobe` — required for audio leveling and assembly.
 - `python -c "import PIL, cv2, numpy"` — Pillow, OpenCV (`opencv-python-headless`) and NumPy for object-level collage animation (`scripts/vox_animator.py`) and paper captions (`scripts/text_overlay.py`).
 

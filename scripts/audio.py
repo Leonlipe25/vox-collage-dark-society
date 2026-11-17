@@ -1,24 +1,28 @@
 #!/usr/bin/env python3
 """
-Audio stage (DarkPlanner TTS + Google Gemini TTS edition):
-Generates per-beat narration using EITHER:
-  1. DarkPlanner API (`DARKPLANNER_API_KEY`) — downloads MP3 + word-level SRT (`_palavra.srt`)
-  2. Google Gemini TTS API (`GEMINI_API_KEY` or `GOOGLE_API_KEY`) — uses `gemini-2.5-flash-preview-tts`
-     with voices like `Charon`, `Orus`, `Fenrir`, `Kore`, `Aoede`, `Puck` and generates word-level SRT.
+Audio stage (DarkPlanner TTS + Google Gemini TTS + Bring-Your-Own-Audio edition):
 
-Applies broadcast audio leveling via ffmpeg and aligns each beat's shot durations
-to the exact spoken duration.
-
-Music (BGM) is optional (place a `bgm.mp3` in `<project>/audio/` or add music later).
+Supports 3 modes:
+  1. Custom / Pre-recorded Audio Mode (NO API KEY NEEDED):
+     - Pass `--from-audio <path/to/voiceover.mp3>` (and optional `--from-srt <path/to/subtitles.srt>`),
+       OR place `master.mp3` (or `narr_1.mp3`, `narr_2.mp3`, ...) inside `<project>/audio/`.
+     - Automatically slices a single `master.mp3` into per-beat `narr_<id>.mp3` files proportional
+       to each beat's script (or aligned to the provided `.srt`), generates word-level `_palavra.srt`,
+       and calculates exact 3.5s–5s shot durations!
+  2. DarkPlanner API (`DARKPLANNER_API_KEY`) — downloads MP3 + word-level SRT (`_palavra.srt`).
+  3. Google Gemini TTS API (`GEMINI_API_KEY` or `GOOGLE_API_KEY`) — uses `gemini-2.5-flash-preview-tts`
+     with voices like `Charon`, `Orus`, `Fenrir`, `Kore`, `Aoede`, `Puck`.
 
 Usage:
   python scripts/audio.py <project_dir>
+  python scripts/audio.py <project_dir> --from-audio <audio.mp3> [--from-srt <subtitles.srt>]
   python scripts/audio.py --list-voices [lang]
 """
 import base64
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -29,7 +33,6 @@ import wave
 DARKPLANNER_BASE = "https://app.darkplanner.com.br/api/v1/audio"
 GEMINI_TTS_MODEL = "gemini-2.5-flash-preview-tts"
 
-# Built-in Google Gemini TTS documentary voices
 GOOGLE_VOICES = [
     {"id": "Charon", "name": "Charon (Deep Authoritative Documentary Narrator)", "gender": "male", "lang": "multilingual"},
     {"id": "Orus",   "name": "Orus (Firm & Resonant Investigative Narrator)", "gender": "male", "lang": "multilingual"},
@@ -94,11 +97,10 @@ def _fmt_srt_time(sec: float) -> str:
 
 
 def build_word_srt_from_duration(text: str, total_dur: float, dest_srt: str):
-    """Generates a proportional word-level SRT (`_palavra.srt`) when using Google TTS."""
+    """Generates a proportional word-level SRT (`_palavra.srt`) from text and audio duration."""
     words = [w for w in re.split(r"\s+", text.strip()) if w]
     if not words:
         return
-    # Weight each word by character length + punctuation pause bonus
     weights = []
     for w in words:
         bonus = 2.5 if w.endswith((".", "!", "?", ":", ";", "—")) else (1.2 if w.endswith(",") else 0.0)
@@ -115,6 +117,44 @@ def build_word_srt_from_duration(text: str, total_dur: float, dest_srt: str):
         t_cur += w_dur
     with open(dest_srt, "w", encoding="utf-8") as f:
         f.write("\n".join(blocks))
+
+
+def slice_master_audio_to_beats(master_audio_path: str, beats: list, adir: str):
+    """
+    Slices a single user-supplied voiceover file (`master.mp3` / `.wav`) into per-beat
+    `narr_<id>.mp3` files proportional to each beat's narration text length, and builds
+    word-level `_palavra.srt` files so no TTS API key is required.
+    """
+    total_dur = probe_dur(master_audio_path)
+    if total_dur <= 0:
+        raise RuntimeError(f"Não foi possível ler a duração do áudio enviado: {master_audio_path}")
+
+    weights = []
+    for b in beats:
+        txt = (b.get("narration") or "").strip()
+        weights.append(max(1, len(txt)))
+    total_w = sum(weights)
+
+    cursor = 0.0
+    for i, (beat, w) in enumerate(zip(beats, weights)):
+        bid = beat["id"]
+        dur = round(total_dur - cursor, 2) if i == len(beats) - 1 else round(total_dur * (w / total_w), 2)
+        dest_mp3 = os.path.join(adir, f"narr_{bid}.mp3")
+        dest_srt = os.path.join(adir, f"narr_{bid}_palavra.srt")
+        raw_slice = os.path.join(adir, f"narr_{bid}_slice.mp3")
+
+        subprocess.run([
+            "ffmpeg", "-y", "-loglevel", "error",
+            "-ss", f"{cursor:.3f}", "-t", f"{dur:.3f}",
+            "-i", master_audio_path,
+            "-c:a", "libmp3lame", "-q:a", "2", raw_slice
+        ], check=True)
+        apply_broadcast_leveling(raw_slice, dest_mp3)
+
+        actual_dur = round(probe_dur(dest_mp3), 2)
+        build_word_srt_from_duration(beat.get("narration", ""), actual_dur, dest_srt)
+        cursor += dur
+        print(f"[Custom Audio -> Beat {bid}] {actual_dur}s -> {dest_mp3}")
 
 
 # =====================================================================
@@ -216,7 +256,6 @@ def generate_google_tts(text: str, voice_name: str, title: str, api_key: str,
         print(f"[Google TTS] Reutilizando áudio existente: {dest_mp3}")
         return dest_mp3
 
-    # Map UUID or unknown voice_id to default Google documentary voice 'Charon'
     valid_names = {v["id"].lower(): v["id"] for v in GOOGLE_VOICES}
     v_clean = valid_names.get((voice_name or "").lower(), "Charon")
 
@@ -302,7 +341,7 @@ def list_voices(lang_filter: str = None):
         print("\n[Dica] Defina DARKPLANNER_API_KEY no arquivo .env para listar as +1.000 vozes do DarkPlanner.")
 
 
-def run(project_dir: str):
+def run(project_dir: str, from_audio: str = None):
     load_dotenv()
     bpath = os.path.join(project_dir, "beats.json")
     with open(bpath, encoding="utf-8") as f:
@@ -310,24 +349,41 @@ def run(project_dir: str):
     adir = os.path.join(project_dir, "audio")
     os.makedirs(adir, exist_ok=True)
 
+    # Check if user supplied a single master audio file (via --from-audio, beats.json "source_audio", or audio/master.mp3)
+    master_candidate = (
+        from_audio
+        or doc.get("source_audio")
+        or (os.path.join(adir, "master.mp3") if os.path.exists(os.path.join(adir, "master.mp3")) else None)
+    )
+    if master_candidate and os.path.exists(master_candidate):
+        print(f"[Custom Audio] Usando áudio pronto enviado pelo usuário: {master_candidate}")
+        slice_master_audio_to_beats(master_candidate, doc["beats"], adir)
+
+    # Check if all narr_<id>.mp3 files already exist (either sliced above or placed directly by the user)
+    all_exist = all(
+        os.path.exists(os.path.join(adir, f"narr_{b['id']}.mp3")) and
+        os.path.getsize(os.path.join(adir, f"narr_{b['id']}.mp3")) > 5000
+        for b in doc["beats"] if (b.get("narration") or "").strip()
+    )
+
     voice = doc.get("voice", {})
     language = (voice.get("language") or doc.get("language") or "en").split("-")[0].lower()
-
     dp_key = voice.get("darkplanner_api_key") or doc.get("darkplanner_api_key") or os.environ.get("DARKPLANNER_API_KEY")
     google_key = voice.get("google_api_key") or doc.get("google_api_key") or os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
 
     provider = (voice.get("provider") or doc.get("tts_provider") or "").lower().strip()
-    if not provider:
+    if not provider and not all_exist:
         if dp_key:
             provider = "darkplanner"
         elif google_key:
             provider = "google"
         else:
             raise RuntimeError(
-                "Nenhuma chave de API de voz configurada!\n"
-                "Por favor, configure UMA das opções abaixo no arquivo `.env` na raiz do projeto:\n"
-                "  1) DARKPLANNER_API_KEY=\"sua_chave_darkplanner\" (para usar o DarkPlanner TTS)\n"
-                "  2) GEMINI_API_KEY=\"sua_chave_google_ai_studio\" (para usar o Google Gemini TTS)\n"
+                "Nenhuma chave de API de voz configurada e nenhum áudio pronto encontrado!\n"
+                "Escolha UMA das 3 opções:\n"
+                "  1) Enviar seu próprio áudio pronto: `python scripts/audio.py out/<projeto> --from-audio seu_audio.mp3`\n"
+                "  2) Configurar DARKPLANNER_API_KEY no arquivo `.env` (para usar o DarkPlanner TTS)\n"
+                "  3) Configurar GEMINI_API_KEY no arquivo `.env` (para usar o Google Gemini TTS)\n"
             )
 
     voice_id = voice.get("voice_id") or ""
@@ -343,37 +399,39 @@ def run(project_dir: str):
         dest_srt = os.path.join(adir, f"narr_{bid}_palavra.srt")
         title = f"{os.path.basename(project_dir)}_beat_{bid}"
 
-        if provider == "google":
-            if not google_key:
-                raise RuntimeError("GEMINI_API_KEY / GOOGLE_API_KEY não encontrada no ambiente ou .env!")
-            generate_google_tts(
-                text=text,
-                voice_name=voice_id or "Charon",
-                title=title,
-                api_key=google_key,
-                dest_mp3=dest_mp3,
-                dest_srt=dest_srt,
-            )
-        else:
-            if not dp_key:
-                raise RuntimeError("DARKPLANNER_API_KEY não encontrada no ambiente ou .env!")
-            dp_vid = voice_id if len(voice_id) >= 20 else DEFAULT_DP_VOICES.get(language, DEFAULT_DP_VOICES["en"])
-            generate_darkplanner_tts(
-                text=text,
-                voice_id=dp_vid,
-                title=title,
-                speed=speed,
-                volume=volume,
-                api_key=dp_key,
-                dest_mp3=dest_mp3,
-                dest_srt=dest_srt,
-            )
+        if not (os.path.exists(dest_mp3) and os.path.getsize(dest_mp3) > 5000):
+            if provider == "google":
+                if not google_key:
+                    raise RuntimeError("GEMINI_API_KEY / GOOGLE_API_KEY não encontrada no ambiente ou .env!")
+                generate_google_tts(
+                    text=text,
+                    voice_name=voice_id or "Charon",
+                    title=title,
+                    api_key=google_key,
+                    dest_mp3=dest_mp3,
+                    dest_srt=dest_srt,
+                )
+            else:
+                if not dp_key:
+                    raise RuntimeError("DARKPLANNER_API_KEY não encontrada no ambiente ou .env!")
+                dp_vid = voice_id if len(voice_id) >= 20 else DEFAULT_DP_VOICES.get(language, DEFAULT_DP_VOICES["en"])
+                generate_darkplanner_tts(
+                    text=text,
+                    voice_id=dp_vid,
+                    title=title,
+                    speed=speed,
+                    volume=volume,
+                    api_key=dp_key,
+                    dest_mp3=dest_mp3,
+                    dest_srt=dest_srt,
+                )
 
         dur = round(probe_dur(dest_mp3), 2)
         beat["narration_audio"] = dest_mp3
         beat["narration_dur"] = dur
-        if os.path.exists(dest_srt):
-            beat["narration_srt"] = dest_srt
+        if not os.path.exists(dest_srt):
+            build_word_srt_from_duration(text, dur, dest_srt)
+        beat["narration_srt"] = dest_srt
 
         shots = beat.get("shots")
         if shots:
@@ -408,6 +466,25 @@ if __name__ == "__main__":
         lf = sys.argv[idx + 1] if idx + 1 < len(sys.argv) else None
         list_voices(lf)
         sys.exit(0)
-    proj = sys.argv[1] if len(sys.argv) > 1 else os.path.join(
+
+    from_audio_arg = None
+    if "--from-audio" in sys.argv:
+        idx = sys.argv.index("--from-audio")
+        if idx + 1 < len(sys.argv):
+            from_audio_arg = sys.argv[idx + 1]
+
+    pos_args = []
+    skip_next = False
+    for a in sys.argv[1:]:
+        if skip_next:
+            skip_next = False
+            continue
+        if a in ("--from-audio", "--from-srt", "--list-voices"):
+            skip_next = True
+            continue
+        if not a.startswith("--"):
+            pos_args.append(a)
+
+    proj = pos_args[0] if pos_args else os.path.join(
         os.path.dirname(__file__), "..", "out", "singapore-vs-malaysia")
-    run(os.path.abspath(proj))
+    run(os.path.abspath(proj), from_audio=from_audio_arg)
