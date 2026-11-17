@@ -1,0 +1,278 @@
+{
+  "title": "Why Did Singapore Get So Much Richer Than Malaysia?",
+  "aspect": "16:9",
+  "style": "collage",
+  "theme": "swiss-modern",
+  "collage_style": "swiss-modern",
+  "caption_style": "paper",
+  "captions": true,
+  "language": "en",
+  "voice": {
+    "voice_id": "b5a75ce4-a73b-4268-9ed2-dc85f2d71c7c",
+    "language": "en",
+    "speed": 1.0,
+    "volume": 1.0
+  },
+  "beats": [
+    {
+      "id": 1,
+      "chapter": "01. HOOK — The 1965 Paradox",
+      "title_cn": "",
+      "title_en": "EXPELLED IN 1965",
+      "narration": "In August nineteen sixty-five, Singapore became the only country in modern history forced into independence against its own will. Expelled from Malaysia with zero oil, no farmland, and not even enough fresh water to drink, this tiny island should have collapsed. Instead, its citizens are now nearly seven times richer than the country that kicked them out.",
+      "narration_dur": 25.73,
+      "bg": "aged cream archival map paper with Swiss editorial grid lines",
+      "feel": "dramatic historical paradox",
+      "shots": [
+        {
+          "id": "a",
+          "title": true,
+          "dur": 4.8,
+          "camera_move": "push_in",
+          "anim_mode": "1a_wide",
+          "scene": "Wide editorial paper collage poster: torn 1965 nautical map of Malaysia and Singapore."
+        },
+        {
+          "id": "b",
+          "title": false,
+          "dur": 4.6,
+          "camera_move": "pan",
+          "anim_mode": "1a_close_strait",
+          "scene": "Close cut-in on the Johor Strait tear and 1965 separation stamp."
+        },
+        {
+          "id": "c",
+          "title": false,
+          "dur": 4.6,
+          "camera_move": "push_in",
+          "anim_mode": "1c_gauge_barrels",
+          "scene": "Tight detail of tipped empty oil barrels and 0% resource gauge."
+        },
+        {
+          "id": "d",
+          "title": false,
+          "dur": 4.0,
+          "camera_move": "pan",
+          "anim_mode": "1b_pipeline",
+          "scene": "Close cut-in on the rusty water pipeline crossing the blue paper strait."
+        },
+        {
+          "id": "e",
+          "title": false,
+          "dur": 3.8,
+          "camera_move": "pull_out",
+          "anim_mode": "1c_crack_wide",
+          "scene": "Cracked Singapore island map with red fracture lightning."
+        },
+        {
+          "id": "f",
+          "title": false,
+          "dur": 4.33,
+          "camera_move": "push_in",
+          "anim_mode": "1b_skyline_dollars",
+          "scene": "Towering emerald dollar bill stack and golden Singapore skyline rising."
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "chapter": "02. CONTEXT — Why Malaysia Had Every Advantage",
+      "title_cn": "",
+      "title_en": "450X LARGER",
+      "narration": "On paper, the contest wasn't even close. Malaysia held vast reserves of crude oil, tin, rubber, and timber across a landmass four hundred and fifty times larger. Singapore was just an overcrowded port of two million people surrounded by turbulent waters.",
+      "narration_dur": 20.76,
+      "bg": "warm ochre kraft paper with blueprint grid cutouts",
+      "feel": "overwhelming scale comparison",
+      "shots": [
+        {
+          "id": "a",
+          "title": true,
+          "dur": 4.5,
+          "camera_move": "push_in",
+          "anim_mode": "2a_wide",
+          "scene": "Wide 450X LARGER poster comparing Malaysia's resources and tiny Singapore."
+        },
+        {
+          "id": "b",
+          "title": false,
+          "dur": 4.8,
+          "camera_move": "pan",
+          "anim_mode": "2a_resources_close",
+          "scene": "Close cut-in on pumping oil derrick, golden barrels, rubber leaves, and silver tin ingots."
+        },
+        {
+          "id": "c",
+          "title": false,
+          "dur": 4.2,
+          "camera_move": "push_in",
+          "anim_mode": "2a_magnifier_close",
+          "scene": "Close cut-in on the magnifying glass zooming over the tiny red dot of Singapore."
+        },
+        {
+          "id": "d",
+          "title": false,
+          "dur": 4.0,
+          "camera_move": "pan",
+          "anim_mode": "2b_harbor_wide",
+          "scene": "Crowded 1960s harbor bumboats and 2,000,000 people cutout."
+        },
+        {
+          "id": "e",
+          "title": false,
+          "dur": 3.66,
+          "camera_move": "pull_out",
+          "anim_mode": "2b_waves_close",
+          "scene": "Turbulent torn dark-blue paper ocean waves rocking around the harbor."
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "chapter": "03. CRITICAL DECISIONS — The Three Ruthless Bets",
+      "title_cn": "",
+      "title_en": "THE 3 BIG BETS",
+      "narration": "While Malaysia leaned on raw commodities and domestic quotas, Singapore made three ruthless bets: it adopted English as the universal language of business, crushed corruption from the top down, and plugged its port and factories directly into New York, London, and Tokyo.",
+      "narration_dur": 19.5,
+      "bg": "deep slate blue blueprint paper with cream grid cutouts",
+      "feel": "strategic precision and global connectivity",
+      "shots": [
+        {
+          "id": "a",
+          "title": true,
+          "dur": 4.2,
+          "camera_move": "push_in",
+          "anim_mode": "3a_wide",
+          "scene": "Wide THE 3 BIG BETS blueprint collage."
+        },
+        {
+          "id": "b",
+          "title": false,
+          "dur": 3.8,
+          "camera_move": "pan",
+          "anim_mode": "3a_english_typewriter",
+          "scene": "Close cut-in on typewriter blocks spelling ENGLISH popping in one by one."
+        },
+        {
+          "id": "c",
+          "title": false,
+          "dur": 3.5,
+          "camera_move": "push_in",
+          "anim_mode": "3a_gavel_strike",
+          "scene": "Close cut-in on the wooden gavel striking down to crush corruption."
+        },
+        {
+          "id": "d",
+          "title": false,
+          "dur": 4.0,
+          "camera_move": "pan",
+          "anim_mode": "3b_wafer_containers",
+          "scene": "Iridescent silicon semiconductor wafer shimmering and cargo containers stacking."
+        },
+        {
+          "id": "e",
+          "title": false,
+          "dur": 4.4,
+          "camera_move": "pull_out",
+          "anim_mode": "3a_world_routes",
+          "scene": "World map with glowing trade routes shooting from Singapore to New York, London, and Tokyo."
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "chapter": "04. CONSEQUENCES — The Great Economic Divergence",
+      "title_cn": "",
+      "title_en": "$88K VS $13K",
+      "narration": "By the nineteen nineties, the two economies didn't just diverge — they entered different worlds. Today, Singapore's GDP per capita stands above eighty-eight thousand dollars, towering over Malaysia's thirteen thousand, backed by sovereign wealth funds worth over a trillion dollars.",
+      "narration_dur": 19.69,
+      "bg": "crisp off-white editorial graph paper with bold black grid",
+      "feel": "data-driven visual payoff",
+      "shots": [
+        {
+          "id": "a",
+          "title": true,
+          "dur": 4.8,
+          "camera_move": "push_in",
+          "anim_mode": "4a_chart_grow",
+          "scene": "Wide $88K VS $13K chart with green Singapore arrow growing steeply upward."
+        },
+        {
+          "id": "b",
+          "title": false,
+          "dur": 5.0,
+          "camera_move": "pan",
+          "anim_mode": "4a_peak_close",
+          "scene": "Close tracking shot along the SINGAPORE $88,000 green ribbon and spinning gold coins."
+        },
+        {
+          "id": "c",
+          "title": false,
+          "dur": 5.0,
+          "camera_move": "push_in",
+          "anim_mode": "4b_vault_wheel",
+          "scene": "Steel bank vault wheel turning and gold bullion bars gleaming."
+        },
+        {
+          "id": "d",
+          "title": false,
+          "dur": 5.29,
+          "camera_move": "pull_out",
+          "anim_mode": "4b_trillion_strings",
+          "scene": "$1 TRILLION+ SOVEREIGN WEALTH banners with glowing red string network and floating dollar bills."
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "chapter": "05. FINAL REVELATION — The Resource Paradox",
+      "title_cn": "",
+      "title_en": "THE PARADOX",
+      "narration": "And that is the ultimate lesson of modern economics: Malaysia had everything under the ground, so politics became a battle over how to divide the spoils. Singapore had nothing under the ground, leaving it only one way to survive — building the most productive minds and institutions on Earth.",
+      "narration_dur": 22.71,
+      "bg": "split dark charcoal and warm cream editorial paper",
+      "feel": "profound documentary conclusion",
+      "shots": [
+        {
+          "id": "a",
+          "title": true,
+          "dur": 4.6,
+          "camera_move": "push_in",
+          "anim_mode": "5a_wide_split",
+          "scene": "Hero split-screen THE PARADOX poster."
+        },
+        {
+          "id": "b",
+          "title": false,
+          "dur": 4.6,
+          "camera_move": "pan",
+          "anim_mode": "5a_underground_gears",
+          "scene": "Close cut-in on buried oil barrels and rotating rusting gears under the ground."
+        },
+        {
+          "id": "c",
+          "title": false,
+          "dur": 4.6,
+          "camera_move": "pan",
+          "anim_mode": "5a_skyline_circuits",
+          "scene": "Close cut-in on Marina Bay Sands with glowing circuit board traces and golden brain."
+        },
+        {
+          "id": "d",
+          "title": false,
+          "dur": 4.6,
+          "camera_move": "push_in",
+          "anim_mode": "5b_brain_synapses",
+          "scene": "Close cut-in on the golden illuminated human brain firing neural synapses and microchip traces."
+        },
+        {
+          "id": "e",
+          "title": false,
+          "dur": 4.71,
+          "camera_move": "static",
+          "anim_mode": "5b_institutions_wide",
+          "scene": "Wide payoff of classical courthouse columns, golden brain, and modern skyscrapers."
+        }
+      ]
+    }
+  ]
+}
