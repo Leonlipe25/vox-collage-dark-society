@@ -1,32 +1,27 @@
 {
-  "name": "vox-director",
-  "version": "1.0.0",
-  "description": "Vox Director — an open-source Agent Skill that turns one topic into a finished Vox-style paper-collage explainer/ad video: script, collage keyframes, motion, voice-over, music and captions, automated end to end on the Atlas Cloud API + local ffmpeg. Works with Claude Code, Codex, and any SKILL.md agent.",
+  "name": "vox-collage-dark-society",
+  "version": "2.0.0",
+  "description": "Vox Collage (Dark Society Edition) — Google Antigravity Agent Skill that turns a topic or ready script+audio into a Vox-style paper-collage documentary using Antigravity's built-in Nano Banana, local OpenCV object animation, and DarkPlanner / Google Gemini TTS.",
   "keywords": [
     "vox",
-    "vox-director",
-    "ai-video",
-    "video-generation",
-    "text-to-video",
+    "vox-collage",
+    "dark-society",
+    "google-antigravity",
+    "nano-banana",
+    "opencv",
     "paper-collage",
-    "collage-video",
-    "motion-graphics",
+    "motion-collage",
     "explainer-video",
-    "ai-ads",
-    "agent-skill",
-    "claude-skill",
-    "claude-code",
-    "codex",
+    "documentary",
     "ffmpeg",
-    "tts",
-    "atlas-cloud",
-    "generative-ai"
+    "darkplanner",
+    "google-tts"
   ],
-  "homepage": "https://github.com/Alisa0808/vox-director",
+  "homepage": "https://github.com/Leonlipe25/vox-collage-dark-society",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Alisa0808/vox-director.git"
+    "url": "https://github.com/Leonlipe25/vox-collage-dark-society.git"
   },
   "license": "MIT",
-  "author": "Alisa0808"
+  "author": "Leon Alves (Dark Society)"
 }
