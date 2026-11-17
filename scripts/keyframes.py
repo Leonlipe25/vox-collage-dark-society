@@ -1,26 +1,21 @@
 #!/usr/bin/env python3
 """
-Keyframe stage: one styled keyframe per SHOT.
+Keyframe stage: one styled keyframe per SHOT (Google Antigravity Built-in Nano Banana edition).
 
-Adapted for Antigravity Built-in Nano Banana (`image-generator` subagent):
-- Composes the full Vox collage prompt (`compose_collage_prompt`) for every shot
+- Composes the 5-layer Vox collage prompt (`compose_collage_prompt`) for every shot
   and writes `keyframe_prompt` + expected `keyframe_path` into `beats.json`.
 - If the image file (`kf_<key>.jpg` or `.png`) is already in `<project>/keyframes/`,
   links it automatically (converting PNG -> JPG if needed).
-- Pass `--atlas` to use Atlas Cloud API instead of Antigravity built-in Nano Banana.
 
 Usage:
-  python keyframes.py <project_dir>            # Antigravity Nano Banana mode (default)
-  python keyframes.py <project_dir> --atlas    # Atlas Cloud API mode
+  python scripts/keyframes.py <project_dir>
 """
 import json
 import os
 import sys
 from PIL import Image
 
-from styles import compose_keyframe_prompt, compose_collage_prompt, resolve_theme, image_params
-
-IMAGE_MODEL = "google/nano-banana-2/text-to-image"
+from styles import compose_keyframe_prompt, compose_collage_prompt, resolve_theme
 
 
 def shots_of(beat):
@@ -32,16 +27,14 @@ def shots_of(beat):
         yield beat, f"{beat['id']}"
 
 
-def run(project_dir, use_atlas=False):
+def run(project_dir: str):
     bpath = os.path.join(project_dir, "beats.json")
     with open(bpath, encoding="utf-8") as f:
         doc = json.load(f)
     aspect = doc.get("aspect", "16:9")
-    img_model = doc.get("image_model", IMAGE_MODEL)
-    img_res = doc.get("image_resolution", "1k")
     style = doc.get("style", "collage")
     theme = resolve_theme(doc.get("theme")) or {}
-    collage_style = theme.get("idiom") or doc.get("collage_style", "american-retro")
+    collage_style = theme.get("idiom") or doc.get("collage_style", "swiss-modern")
     t_palette = theme.get("palette") or doc.get("palette")
     t_type = theme.get("type_style") or doc.get("type_style")
     t_finish = theme.get("finish") or doc.get("finish")
@@ -50,12 +43,9 @@ def run(project_dir, use_atlas=False):
     os.makedirs(kf_dir, exist_ok=True)
 
     pending = []
-    specs, by_key = {}, {}
 
     for beat in doc["beats"]:
         for shot, key in shots_of(beat):
-            if shot.get("kind") == "host":
-                continue
             dest_jpg = os.path.join(kf_dir, f"kf_{key}.jpg")
             dest_png = os.path.join(kf_dir, f"kf_{key}.png")
 
@@ -78,35 +68,12 @@ def run(project_dir, use_atlas=False):
                 prompt = compose_keyframe_prompt(era, scene, t_cn, t_en, aspect)
 
             shot["keyframe_prompt"] = prompt
+            shot["keyframe_path"] = dest_jpg
 
             if os.path.exists(dest_jpg):
-                shot["keyframe_path"] = dest_jpg
                 print(f"[{key}] OK (local): {dest_jpg}")
-                continue
-
-            if use_atlas:
-                from provider import get_provider
-                prov = get_provider(doc.get("provider"))
-                specs[key] = (lambda p=prompt: prov.submit_image(
-                    img_model, p, **image_params(img_model, aspect, img_res)))
-                by_key[key] = shot
             else:
-                shot["keyframe_path"] = dest_jpg
                 pending.append((key, dest_jpg, prompt))
-
-    if use_atlas and specs:
-        from provider import get_provider, run_jobs
-        prov = get_provider(doc.get("provider"))
-        done = run_jobs(prov, specs, poll_s=3, stall_s=75, max_retries=2, deadline_s=300)
-        for key, url in done.items():
-            if not url:
-                continue
-            dest = os.path.join(kf_dir, f"kf_{key}.jpg")
-            prov.download(url, dest)
-            shot = by_key[key]
-            shot["keyframe_url"] = url
-            shot["keyframe_path"] = dest
-            print(f"[{key}] saved {dest}")
 
     with open(bpath, "w", encoding="utf-8") as f:
         json.dump(doc, f, ensure_ascii=False, indent=2)
@@ -121,7 +88,6 @@ def run(project_dir, use_atlas=False):
 
 if __name__ == "__main__":
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
-    use_atlas = "--atlas" in sys.argv
     proj = args[0] if args else os.path.join(
-        os.path.dirname(__file__), "..", "out", "tang-30s")
-    run(os.path.abspath(proj), use_atlas=use_atlas)
+        os.path.dirname(__file__), "..", "out", "singapore-vs-malaysia")
+    run(os.path.abspath(proj))
